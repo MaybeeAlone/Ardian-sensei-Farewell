@@ -236,6 +236,42 @@
         color: var(--text-dim);
       }
 
+      /* Indikator loading kecil di pojok kanan atas */
+      #loading-indicator {
+        position: fixed;
+        top: calc(14px + env(safe-area-inset-top, 0px));
+        left: 14px;
+        z-index: 999;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 10px;
+        background: rgba(22, 26, 51, 0.75);
+        border: 1px solid rgba(0, 242, 254, 0.25);
+        border-radius: 999px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.65rem;
+        color: var(--text-dim);
+        backdrop-filter: blur(8px);
+        pointer-events: none;
+        opacity: 1;
+        transition: opacity 0.4s ease;
+      }
+      #loading-indicator.hidden {
+        opacity: 0;
+      }
+      .loading-spinner {
+        width: 10px;
+        height: 10px;
+        border: 2px solid rgba(0, 242, 254, 0.25);
+        border-top-color: var(--cyan);
+        border-radius: 50%;
+        animation: loading-spin 0.7s linear infinite;
+      }
+      @keyframes loading-spin {
+        to { transform: rotate(360deg); }
+      }
+
       .nav-arrow {
         position: fixed;
         top: 50%;
@@ -787,6 +823,12 @@
     <!-- BGM LOKAL -->
     <audio id="bgmAudio" src="Sayonara-no-Jikan.mp3" loop preload="auto"></audio>
 
+    <!-- Indikator loading kecil di pojok -->
+    <div id="loading-indicator">
+      <span class="loading-spinner"></span>
+      <span>Memuat…</span>
+    </div>
+
     <div id="progress-bar"><div id="progress-fill"></div></div>
     <div id="counter">1 / 38</div>
 
@@ -1234,6 +1276,48 @@
         updateMoonPosition(current);
       });
 
+      /* ================= SWIPE NAVIGASI (HP) ================= */
+      (function setupSwipe() {
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchStartTime = 0;
+        const SWIPE_MIN_DISTANCE = 50; // px
+        const SWIPE_MAX_OFF_AXIS = 60; // px, biar swipe vertikal (scroll) gak kepencet
+        const SWIPE_MAX_TIME = 600; // ms
+
+        carousel.addEventListener("touchstart", (e) => {
+          if (e.touches.length !== 1) return;
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+          touchStartTime = Date.now();
+        }, { passive: true });
+
+        carousel.addEventListener("touchend", (e) => {
+          // Slide cover terkunci — samain sama aturan panah & keyboard,
+          // harus pencet tombol "Jelajahi Ucapan" secara fisik.
+          if (current === 0) return;
+          // Jangan swipe kalau lagi mulai dari dalam player/kontrol video
+          // finale (biar gak nabrak drag progress bar / tombol video).
+          if (e.target.closest && e.target.closest(".video-shell")) return;
+
+          const touch = e.changedTouches[0];
+          if (!touch) return;
+          const dx = touch.clientX - touchStartX;
+          const dy = touch.clientY - touchStartY;
+          const dt = Date.now() - touchStartTime;
+
+          if (dt > SWIPE_MAX_TIME) return;
+          if (Math.abs(dy) > SWIPE_MAX_OFF_AXIS) return;
+          if (Math.abs(dx) < SWIPE_MIN_DISTANCE) return;
+
+          if (dx < 0) {
+            goTo(current + 1); // swipe ke kiri -> slide berikutnya
+          } else {
+            goTo(current - 1); // swipe ke kanan -> slide sebelumnya
+          }
+        }, { passive: true });
+      })();
+
       /* ================= CUSTOM VIDEO PLAYER ================= */
       const videoContainer = document.getElementById("videoContainer");
       const mainVideo = document.getElementById("mainVideo");
@@ -1398,6 +1482,24 @@
       });
 
       render();
+
+      /* ================= SEMBUNYIIN LOADING INDICATOR ================= */
+      (function hideLoadingIndicator() {
+        const loader = document.getElementById("loading-indicator");
+        if (!loader) return;
+        let hidden = false;
+        function doHide() {
+          if (hidden) return;
+          hidden = true;
+          loader.classList.add("hidden");
+          setTimeout(() => loader.remove(), 500);
+        }
+        // Begitu semua aset halaman (gambar, dll) selesai dimuat browser.
+        window.addEventListener("load", doHide);
+        // Jaga-jaga kalau ada aset (misal video besar) yang bikin event
+        // "load" nggak kunjung nembak — paksa hilang maksimal 5 detik.
+        setTimeout(doHide, 5000);
+      })();
     </script>
   </body>
 </html>
