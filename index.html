@@ -272,6 +272,44 @@
         to { transform: rotate(360deg); }
       }
 
+      /* Overlay blokir akses HP */
+      #mobile-block {
+        display: none;
+      }
+      #mobile-block.active {
+        display: flex;
+        position: fixed;
+        inset: 0;
+        z-index: 999999;
+        align-items: center;
+        justify-content: center;
+        padding: 32px;
+        text-align: center;
+        background: radial-gradient(circle at 50% 30%, #131735 0%, var(--bg) 70%);
+      }
+      html.is-mobile-blocked body {
+        overflow: hidden;
+      }
+      .mobile-block-inner {
+        max-width: 360px;
+      }
+      .mobile-block-icon {
+        font-size: 3rem;
+        margin-bottom: 16px;
+      }
+      .mobile-block-inner h2 {
+        font-family: "JetBrains Mono", monospace;
+        color: var(--cyan);
+        font-size: 1.2rem;
+        margin-bottom: 12px;
+        text-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
+      }
+      .mobile-block-inner p {
+        color: var(--text-dim);
+        line-height: 1.6;
+        font-size: 0.9rem;
+      }
+
       .nav-arrow {
         position: fixed;
         top: 50%;
@@ -821,13 +859,47 @@
     </div>
 
     <!-- BGM LOKAL -->
-    <audio id="bgmAudio" src="Sayonara-no-Jikan.mp3" loop preload="auto"></audio>
+    <audio id="bgmAudio" src="Sayonara-no-Jikan.mp3" loop preload="none"></audio>
 
     <!-- Indikator loading kecil di pojok -->
     <div id="loading-indicator">
       <span class="loading-spinner"></span>
       <span>Memuat…</span>
     </div>
+
+    <!-- Blokir akses HP, minta buka di laptop/PC -->
+    <div id="mobile-block">
+      <div class="mobile-block-inner">
+        <div class="mobile-block-icon">💻</div>
+        <h2>Buka di Laptop / PC, ya!</h2>
+        <p>
+          Website ini didesain khusus untuk layar besar biar pengalamannya
+          maksimal. Coba buka lagi lewat laptop atau komputer ya 🙏
+        </p>
+      </div>
+    </div>
+    <script>
+      // Deteksi dini — dijalankan sebelum konten berat lain dimuat,
+      // biar nggak ada "kedipan" konten sebelum overlay muncul.
+      (function () {
+        function isMobileDevice() {
+          var uaMobile = /Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|webOS/i.test(
+            navigator.userAgent
+          );
+          var narrowTouch =
+            ("ontouchstart" in window || navigator.maxTouchPoints > 0) &&
+            window.innerWidth <= 768;
+          return uaMobile || narrowTouch;
+        }
+        if (isMobileDevice()) {
+          document.documentElement.classList.add("is-mobile-blocked");
+          document.getElementById("mobile-block").classList.add("active");
+        } else {
+          var bgm = document.getElementById("bgmAudio");
+          if (bgm) bgm.preload = "auto";
+        }
+      })();
+    </script>
 
     <div id="progress-bar"><div id="progress-fill"></div></div>
     <div id="counter">1 / 38</div>
