@@ -15,17 +15,17 @@
     />
     <style>
       :root {
-        --bg: #1f2437;
-        --bg2: #171b2a;
-        --surface: #282d42;
-        --surface2: #323851;
-        --cyan: #9b6136;
-        --purple: #503c40;
-        --gold: #c9915a;
-        --green: #6a7355;
-        --text: #f3ede6;
-        --text-dim: #ab9d92;
-        --line: rgba(255, 255, 255, 0.08);
+        --bg: #0b0e16;
+        --bg2: #080a10;
+        --surface: #161a26;
+        --surface2: #1f2433;
+        --cyan: #f5c518;
+        --purple: #b5622f;
+        --gold: #ffe066;
+        --green: #cbb789;
+        --text: #f5efe4;
+        --text-dim: #9c8f7c;
+        --line: rgba(255, 224, 150, 0.08);
         --shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
       }
       :root {
@@ -69,7 +69,7 @@
         inset: 0;
         z-index: 0;
         overflow: hidden;
-        background: radial-gradient(circle at 50% 50%, #252a40, var(--bg));
+        background: radial-gradient(circle at 50% 50%, #12151f, var(--bg));
       }
 
       #bg-ambient::before {
@@ -80,7 +80,7 @@
         width: 50vw;
         height: 50vw;
         border-radius: 50%;
-        background: radial-gradient(circle, rgba(155, 97, 54, 0.15), transparent 70%);
+        background: radial-gradient(circle, rgba(245, 197, 24, 0.15), transparent 70%);
         filter: blur(70px);
       }
 
@@ -179,10 +179,10 @@
         font-size: 0.8rem;
         letter-spacing: 0.08em;
         color: var(--cyan);
-        background: rgba(23, 27, 42, 0.8);
+        background: rgba(8, 10, 16, 0.8);
         padding: 6px 16px;
         border-radius: 999px;
-        border: 1px solid rgba(155, 97, 54, 0.3);
+        border: 1px solid rgba(245, 197, 24, 0.3);
         backdrop-filter: blur(10px);
         font-family: "JetBrains Mono", monospace;
       }
@@ -193,7 +193,7 @@
         bottom: 20px;
         left: 20px;
         z-index: 60;
-        background: rgba(40, 45, 66, 0.8);
+        background: rgba(22, 26, 38, 0.8);
         border: 1px solid var(--cyan);
         color: var(--text);
         padding: 8px 16px;
@@ -206,12 +206,12 @@
         gap: 8px;
         font-family: "JetBrains Mono", monospace;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(155, 97, 54, 0.2);
+        box-shadow: 0 4px 15px rgba(245, 197, 24, 0.2);
       }
       #bgm-control:hover {
         border-color: var(--cyan);
         color: var(--cyan);
-        box-shadow: 0 0 15px rgba(155, 97, 54, 0.4);
+        box-shadow: 0 0 15px rgba(245, 197, 24, 0.4);
       }
       
       /* State saat BGM Mati */
@@ -246,8 +246,8 @@
         align-items: center;
         gap: 6px;
         padding: 5px 10px;
-        background: rgba(40, 45, 66, 0.75);
-        border: 1px solid rgba(155, 97, 54, 0.25);
+        background: rgba(22, 26, 38, 0.75);
+        border: 1px solid rgba(245, 197, 24, 0.25);
         border-radius: 999px;
         font-family: "JetBrains Mono", monospace;
         font-size: 0.65rem;
@@ -263,7 +263,7 @@
       .loading-spinner {
         width: 10px;
         height: 10px;
-        border: 2px solid rgba(155, 97, 54, 0.25);
+        border: 2px solid rgba(245, 197, 24, 0.25);
         border-top-color: var(--cyan);
         border-radius: 50%;
         animation: loading-spin 0.7s linear infinite;
@@ -285,7 +285,7 @@
         justify-content: center;
         padding: 32px;
         text-align: center;
-        background: radial-gradient(circle at 50% 30%, #282d42 0%, var(--bg) 70%);
+        background: radial-gradient(circle at 50% 30%, #161a26 0%, var(--bg) 70%);
       }
       html.is-mobile-blocked body {
         overflow: hidden;
@@ -298,7 +298,7 @@
         color: var(--cyan);
         font-size: 1.2rem;
         margin-bottom: 12px;
-        text-shadow: 0 0 15px rgba(155, 97, 54, 0.4);
+        text-shadow: 0 0 15px rgba(245, 197, 24, 0.4);
       }
       .mobile-block-inner p {
         color: var(--text-dim);
@@ -314,8 +314,8 @@
         width: 50px;
         height: 50px;
         border-radius: 50%;
-        border: 1px solid rgba(155, 97, 54, 0.2);
-        background: rgba(40, 45, 66, 0.6);
+        border: 1px solid rgba(245, 197, 24, 0.2);
+        background: rgba(22, 26, 38, 0.6);
         color: var(--text);
         font-size: 1.6rem;
         cursor: pointer;
@@ -326,28 +326,13 @@
         transition: 0.25s;
       }
       .nav-arrow:hover {
-        background: rgba(155, 97, 54, 0.2);
+        background: rgba(245, 197, 24, 0.2);
         border-color: var(--cyan);
         color: var(--cyan);
-        box-shadow: 0 0 20px rgba(155, 97, 54, 0.4);
+        box-shadow: 0 0 20px rgba(245, 197, 24, 0.4);
       }
       .nav-arrow.left { left: 18px; }
       .nav-arrow.right { right: 18px; }
-      .nav-arrow::before {
-        content: "";
-        width: 9px;
-        height: 9px;
-        border-top: 2px solid currentColor;
-        border-right: 2px solid currentColor;
-      }
-      .nav-arrow.left::before {
-        transform: rotate(-135deg);
-        margin-left: 4px;
-      }
-      .nav-arrow.right::before {
-        transform: rotate(45deg);
-        margin-right: 4px;
-      }
       .nav-arrow:disabled {
         opacity: 0.2;
         cursor: default;
@@ -459,8 +444,8 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        background: rgba(155, 97, 54, 0.1);
-        border: 1px solid rgba(155, 97, 54, 0.3);
+        background: rgba(245, 197, 24, 0.1);
+        border: 1px solid rgba(245, 197, 24, 0.3);
         color: var(--cyan);
         font-family: "JetBrains Mono", monospace;
         font-size: 0.85rem;
@@ -492,18 +477,18 @@
         font-family: "Sora", sans-serif;
         font-weight: 600;
         font-size: 1rem;
-        color: #1f2437;
+        color: #0b0e16;
         background: linear-gradient(100deg, var(--cyan), var(--green));
         border: none;
         border-radius: 999px;
         padding: 16px 40px;
         cursor: pointer;
-        box-shadow: 0 0 25px rgba(155, 97, 54, 0.4);
+        box-shadow: 0 0 25px rgba(245, 197, 24, 0.4);
         transition: 0.3s;
       }
       .hero-cta:hover {
         transform: translateY(-3px) scale(1.02);
-        box-shadow: 0 0 35px rgba(155, 97, 54, 0.7);
+        box-shadow: 0 0 35px rgba(245, 197, 24, 0.7);
       }
 
       /* STUDENT CARD SLIDES */
@@ -513,8 +498,8 @@
         display: grid;
         grid-template-columns: 290px 1fr;
         gap: 40px;
-        background: rgba(40, 45, 66, 0.7);
-        border: 1px solid rgba(155, 97, 54, 0.2);
+        background: rgba(22, 26, 38, 0.7);
+        border: 1px solid rgba(245, 197, 24, 0.2);
         border-radius: 24px;
         padding: 40px;
         box-shadow: var(--shadow);
@@ -532,7 +517,7 @@
         font-family: "JetBrains Mono", monospace;
         font-weight: 700;
         font-size: 0.8rem;
-        color: #1f2437;
+        color: #0b0e16;
         background: linear-gradient(100deg, var(--cyan), var(--purple));
         padding: 5px 14px;
         border-radius: 999px;
@@ -606,8 +591,8 @@
         border-radius: 20px;
         overflow: hidden;
         background: #000;
-        border: 2px solid rgba(155, 97, 54, 0.4);
-        box-shadow: 0 0 30px rgba(155, 97, 54, 0.2), var(--shadow);
+        border: 2px solid rgba(245, 197, 24, 0.4);
+        box-shadow: 0 0 30px rgba(245, 197, 24, 0.2), var(--shadow);
         position: relative;
         margin: 0 auto;
         transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.4s ease, border-color 0.3s ease, box-shadow 0.3s ease;
@@ -615,7 +600,7 @@
 
       .video-shell:hover {
         border-color: var(--cyan);
-        box-shadow: 0 0 40px rgba(155, 97, 54, 0.4), var(--shadow);
+        box-shadow: 0 0 40px rgba(245, 197, 24, 0.4), var(--shadow);
       }
 
       .video-shell video {
@@ -635,7 +620,7 @@
 
       @keyframes videoBounce {
         0% { transform: scale(0.94); filter: brightness(0.8); }
-        50% { transform: scale(1.03); filter: brightness(1.2); box-shadow: 0 0 60px rgba(155, 97, 54, 0.7); }
+        50% { transform: scale(1.03); filter: brightness(1.2); box-shadow: 0 0 60px rgba(245, 197, 24, 0.7); }
         100% { transform: scale(1); filter: brightness(1); }
       }
 
@@ -643,7 +628,7 @@
         position: absolute;
         inset: 0;
         z-index: 10;
-        background: rgba(31, 36, 55, 0.5);
+        background: rgba(11, 14, 22, 0.5);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -657,19 +642,18 @@
       }
 
       .play-icon {
-        height: 60px;
-        padding: 0 30px;
-        background: rgba(155, 97, 54, 0.15);
+        width: 80px;
+        height: 80px;
+        background: rgba(245, 197, 24, 0.15);
         border: 2px solid var(--cyan);
-        border-radius: 999px;
+        border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         backdrop-filter: blur(10px);
         color: #fff;
-        font-family: "Inter", sans-serif;
-        font-size: 1.05rem;
-        font-weight: 600;
+        font-size: 2.2rem;
+        padding-left: 6px;
         position: relative;
         transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       }
@@ -677,7 +661,7 @@
         content: "";
         position: absolute;
         inset: -10px;
-        border-radius: 999px;
+        border-radius: 50%;
         border: 2px solid var(--purple);
         opacity: 0;
         transform: scale(0.8);
@@ -686,9 +670,9 @@
       .video-overlay:hover .play-icon {
         transform: scale(1.15);
         background: var(--cyan);
-        color: #1f2437;
+        color: #0b0e16;
         border-color: var(--cyan);
-        box-shadow: 0 0 35px rgba(155, 97, 54, 0.8);
+        box-shadow: 0 0 35px rgba(245, 197, 24, 0.8);
       }
       .video-overlay:hover .play-icon::before {
         opacity: 0.8;
@@ -705,7 +689,7 @@
       @keyframes playPress {
         0% { transform: scale(1.15); }
         30% { transform: scale(0.85); background: var(--gold); }
-        60% { box-shadow: 0 0 50px 20px rgba(155, 97, 54, 0.8); }
+        60% { box-shadow: 0 0 50px 20px rgba(245, 197, 24, 0.8); }
         100% { transform: scale(1.4); opacity: 0; }
       }
 
@@ -715,7 +699,7 @@
         left: 0;
         right: 0;
         z-index: 20;
-        background: linear-gradient(to top, rgba(31, 36, 55, 0.95), transparent);
+        background: linear-gradient(to top, rgba(11, 14, 22, 0.95), transparent);
         padding: 24px 24px 16px;
         display: flex;
         flex-direction: column;
@@ -730,16 +714,14 @@
         top: 20px;
         right: 24px;
         z-index: 30;
-        background: rgba(23, 27, 42, 0.7);
+        background: rgba(8, 10, 16, 0.7);
         border: 1px solid rgba(255, 255, 255, 0.2);
         color: #fff;
-        height: 38px;
-        padding: 0 18px;
-        border-radius: 999px;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
         cursor: pointer;
-        font-family: "Inter", sans-serif;
-        font-size: 0.8rem;
-        font-weight: 500;
+        font-size: 1.2rem;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -807,24 +789,23 @@
         gap: 16px;
       }
       .ctrl-btn {
+        background: none;
         border: none;
         color: #fff;
-        font-family: "Inter", sans-serif;
-        font-size: 0.8rem;
-        font-weight: 500;
+        font-size: 1.1rem;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 34px;
-        padding: 0 16px;
-        border-radius: 999px;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
         background: rgba(255, 255, 255, 0.08);
         backdrop-filter: blur(4px);
         transition: all 0.2s ease;
       }
       .ctrl-btn:hover {
-        background: rgba(155, 97, 54, 0.25);
+        background: rgba(245, 197, 24, 0.25);
         color: var(--cyan);
         transform: scale(1.1);
       }
@@ -920,11 +901,11 @@
 
     <!-- Tombol BGM -->
     <button id="bgm-control" title="Toggle Musik Latar">
-      <span id="bgm-icon">Musik:</span> <span id="bgm-text">Sayonara no Jikan</span>
+      <span id="bgm-icon">🎵</span> <span id="bgm-text">Sayonara no Jikan</span>
     </button>
 
-    <button class="nav-arrow left" id="prevBtn" aria-label="Sebelumnya"></button>
-    <button class="nav-arrow right" id="nextBtn" aria-label="Berikutnya"></button>
+    <button class="nav-arrow left" id="prevBtn" aria-label="Sebelumnya">‹</button>
+    <button class="nav-arrow right" id="nextBtn" aria-label="Berikutnya">›</button>
 
     <div id="carousel"></div>
 
@@ -945,10 +926,10 @@
         const bgmBtn = document.getElementById("bgm-control");
 
         if (isBgmOn) {
-          bgmIcon.textContent = "Musik:";
+          bgmIcon.textContent = "🎵";
           bgmBtn.classList.remove("muted");
         } else {
-          bgmIcon.textContent = "Musik mati —";
+          bgmIcon.textContent = "🔇";
           bgmBtn.classList.add("muted");
         }
       }
@@ -1094,7 +1075,7 @@
           }
         }
         draw() {
-          ctx.fillStyle = `rgba(155, 97, 54, ${this.opacity})`;
+          ctx.fillStyle = `rgba(245, 197, 24, ${this.opacity})`;
           ctx.beginPath();
           ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
           ctx.fill();
@@ -1233,10 +1214,10 @@
     <p>Ini video dari kita semua, kumpulan kenangan belajar bareng sensei selama di 11 TKJ.</p>
     
     <div class="video-shell" id="videoContainer">
-      <button id="cinema-close" title="Tutup">Tutup</button>
+      <button id="cinema-close" title="Tutup">✕</button>
       
       <div class="video-overlay" id="videoOverlay" title="Klik untuk memutar video">
-        <div class="play-icon" id="playIcon">Putar</div>
+        <div class="play-icon" id="playIcon">▶</div>
       </div>
 
       <video id="mainVideo" src="${finaleVideo}" playsinline></video>
@@ -1247,12 +1228,12 @@
         </div>
         <div class="controls-row">
           <div class="controls-left">
-            <button class="ctrl-btn" id="playPauseBtn" title="Play/Pause (Space)">Putar</button>
-            <button class="ctrl-btn" id="muteBtn" title="Mute/Unmute">Suara</button>
+            <button class="ctrl-btn" id="playPauseBtn" title="Play/Pause (Space)">▶</button>
+            <button class="ctrl-btn" id="muteBtn" title="Mute/Unmute">🔊</button>
             <span class="time-display" id="timeDisplay">00:00 / 00:00</span>
           </div>
           <div class="controls-right">
-            <button class="ctrl-btn" id="fsBtn" title="Layar Penuh (F)">Layar Penuh</button>
+            <button class="ctrl-btn" id="fsBtn" title="Layar Penuh (F)">⛶</button>
           </div>
         </div>
       </div>
@@ -1435,13 +1416,13 @@
       function togglePlay() {
         if (mainVideo.paused) {
           mainVideo.play();
-          playPauseBtn.textContent = "Jeda";
+          playPauseBtn.textContent = "⏸";
           videoContainer.classList.add("playing");
           videoOverlay.classList.add("hidden");
           resetHideTimer();
         } else {
           mainVideo.pause();
-          playPauseBtn.textContent = "Putar";
+          playPauseBtn.textContent = "▶";
           videoContainer.classList.remove("playing");
           showUI();
         }
@@ -1504,7 +1485,7 @@
 
       muteBtn.addEventListener("click", () => {
         mainVideo.muted = !mainVideo.muted;
-        muteBtn.textContent = mainVideo.muted ? "Suara Mati" : "Suara";
+        muteBtn.textContent = mainVideo.muted ? "🔇" : "🔊";
       });
 
       fsBtn.addEventListener("click", toggleFullscreen);
