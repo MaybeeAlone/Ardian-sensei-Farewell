@@ -6,9 +6,10 @@
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
-    <title>Farewell Ardian sensei — 11 TKJ</title>
+    <title>Selamat Tingal Ardian Sensei</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="icon" type="image/png" href="smkn3yk.png" />
     <link
       href="https://fonts.googleapis.com/css2?family=Sora:wght@300;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap"
       rel="stylesheet"
@@ -81,6 +82,19 @@
         height: 50vw;
         border-radius: 50%;
         background: radial-gradient(circle, rgba(245, 197, 24, 0.15), transparent 70%);
+        filter: blur(70px);
+      }
+
+      /* Glow kedua di kanan bawah biar komposisinya seimbang */
+      #bg-ambient::after {
+        content: "";
+        position: absolute;
+        bottom: -12%;
+        right: -10%;
+        width: 45vw;
+        height: 45vw;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(245, 197, 24, 0.12), transparent 70%);
         filter: blur(70px);
       }
 
@@ -171,21 +185,6 @@
         transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         box-shadow: 0 0 10px var(--cyan);
       }
-      #counter {
-        position: fixed;
-        top: calc(16px + env(safe-area-inset-top, 0px));
-        right: 20px;
-        z-index: 50;
-        font-size: 0.8rem;
-        letter-spacing: 0.08em;
-        color: var(--cyan);
-        background: rgba(8, 10, 16, 0.8);
-        padding: 6px 16px;
-        border-radius: 999px;
-        border: 1px solid rgba(245, 197, 24, 0.3);
-        backdrop-filter: blur(10px);
-        font-family: "JetBrains Mono", monospace;
-      }
 
       /* BGM FLOATING CONTROL BUTTON */
       #bgm-control {
@@ -234,6 +233,25 @@
       #bgm-control:disabled:hover {
         border-color: rgba(255, 255, 255, 0.15);
         color: var(--text-dim);
+      }
+
+      /* Belum boleh keliatan di slide pertama (cover) */
+      #bgm-control.bgm-pending {
+        opacity: 0;
+        pointer-events: none;
+      }
+      /* Fade-in begitu masuk slide kedua — sekali muncul, tetap
+         kepasang & keliatan terus di slide mana pun setelahnya. */
+      #bgm-control.bgm-pop {
+        animation: bgmFadeIn 0.7s ease;
+      }
+      @keyframes bgmFadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
       }
 
       /* Indikator loading kecil di pojok kanan atas */
@@ -301,6 +319,49 @@
         text-shadow: 0 0 15px rgba(245, 197, 24, 0.4);
       }
       .mobile-block-inner p {
+        color: var(--text-dim);
+        line-height: 1.6;
+        font-size: 0.9rem;
+      }
+
+      /* Overlay wajib fullscreen sebelum lanjut — selalu di-mount, tinggal
+         di-fade lewat opacity biar transisi ke/dari website utama halus,
+         gak ngeblink kayak toggle display:none/flex. */
+      #fullscreen-gate {
+        position: fixed;
+        inset: 0;
+        z-index: 999998;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 32px;
+        text-align: center;
+        background: radial-gradient(circle at 50% 30%, #161a26 0%, var(--bg) 70%);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.6s ease;
+      }
+      #fullscreen-gate.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      html.is-fs-gated body {
+        overflow: hidden;
+      }
+      .fullscreen-gate-inner {
+        max-width: 380px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+      }
+      .fullscreen-gate-inner h2 {
+        font-family: "JetBrains Mono", monospace;
+        color: var(--cyan);
+        font-size: 1.2rem;
+        text-shadow: 0 0 15px rgba(245, 197, 24, 0.4);
+      }
+      .fullscreen-gate-inner p {
         color: var(--text-dim);
         line-height: 1.6;
         font-size: 0.9rem;
@@ -873,6 +934,18 @@
         </p>
       </div>
     </div>
+
+    <!-- Wajib masuk fullscreen dulu sebelum lanjut -->
+    <div id="fullscreen-gate">
+      <div class="fullscreen-gate-inner">
+        <h2>Silahkan masuk ke Fullscreen</h2>
+        <p>
+          Supaya Persembahan ini bisa lebih maksimal dan imersif,
+          Ardian Sensei bisa masuk Fullscreen terlebih dahulu.
+        </p>
+        <button class="hero-cta" id="fsGateBtn">Fullscreen</button>
+      </div>
+    </div>
     <script>
       // Deteksi dini — dijalankan sebelum konten berat lain dimuat,
       // biar nggak ada "kedipan" konten sebelum overlay muncul.
@@ -894,13 +967,75 @@
           if (bgm) bgm.preload = "auto";
         }
       })();
+
+      // Wajib fullscreen — kalau pas pertama masuk kedetect belum
+      // fullscreen, tampilin overlay minta klik buat masuk fullscreen dulu.
+      // Kalau di tengah jalan keluar fullscreen lagi, overlay ini muncul lagi.
+      (function setupFullscreenGate() {
+        var gate = document.getElementById("fullscreen-gate");
+        var btn = document.getElementById("fsGateBtn");
+        if (!gate || !btn) return;
+
+        function isFullscreen() {
+          return !!(
+            document.fullscreenElement ||
+            document.webkitFullscreenElement ||
+            document.mozFullScreenElement ||
+            document.msFullscreenElement
+          );
+        }
+
+        function requestFS() {
+          var el = document.documentElement;
+          var req =
+            el.requestFullscreen ||
+            el.webkitRequestFullscreen ||
+            el.mozRequestFullScreen ||
+            el.msRequestFullscreen;
+          if (req) {
+            try {
+              var result = req.call(el);
+              if (result && result.catch) result.catch(function () {});
+            } catch (e) {}
+          }
+        }
+
+        function checkState() {
+          // Kalau lagi diblokir karena HP, biar overlay HP aja yang tampil.
+          if (document.documentElement.classList.contains("is-mobile-blocked")) {
+            gate.classList.remove("active");
+            document.documentElement.classList.remove("is-fs-gated");
+            return;
+          }
+          if (isFullscreen()) {
+            gate.classList.remove("active");
+            document.documentElement.classList.remove("is-fs-gated");
+          } else {
+            gate.classList.add("active");
+            document.documentElement.classList.add("is-fs-gated");
+          }
+        }
+
+        btn.addEventListener("click", requestFS);
+
+        [
+          "fullscreenchange",
+          "webkitfullscreenchange",
+          "mozfullscreenchange",
+          "MSFullscreenChange",
+        ].forEach(function (evt) {
+          document.addEventListener(evt, checkState);
+        });
+
+        checkState();
+      })();
     </script>
 
     <div id="progress-bar"><div id="progress-fill"></div></div>
-    <div id="counter">1 / 38</div>
 
-    <!-- Tombol BGM -->
-    <button id="bgm-control" title="Toggle Musik Latar">
+    <!-- Tombol BGM: sengaja disembunyikan dulu di slide pertama,
+         baru muncul dengan animasi begitu slide kedua dibuka. -->
+    <button id="bgm-control" class="bgm-pending" title="Toggle Musik Latar">
       <span id="bgm-icon">🎵</span> <span id="bgm-text">Sayonara no Jikan</span>
     </button>
 
@@ -918,6 +1053,7 @@
       let isBgmOn = false;
       let hasInteracted = false;
       let bgmAutoPausedByFinale = false;
+      let bgmBtnRevealed = false;
 
       bgmAudio.volume = 0;
 
@@ -1020,14 +1156,13 @@
 
       bgmBtn.addEventListener("click", toggleBGM);
 
-      // Coba autoplay begitu file audio siap; kalau diblokir browser,
-      // musik baru akan mulai saat pengguna pertama kali berinteraksi.
+      // Musik cuma boleh mulai begitu tombol "Kesan Pesan dari Kami" (startBtn)
+      // diklik — bukan klik sembarangan di halaman. Pakai event delegation
+      // (bukan getElementById langsung) karena tombolnya baru dibuat belakangan
+      // lewat carousel.innerHTML, jadi belum ada di DOM saat skrip ini jalan.
       function startAudioOnUserInteraction(e) {
         if (hasInteracted) return;
-        // Kalau interaksi pertama pengguna justru di tombol BGM itu sendiri,
-        // biarkan toggleBGM() yang menangani sepenuhnya, supaya statenya
-        // gak ke-toggle dua kali (nyala lalu langsung mati lagi).
-        if (e && e.target && e.target.closest && e.target.closest("#bgm-control")) {
+        if (!e || !e.target || !e.target.closest || !e.target.closest("#startBtn")) {
           return;
         }
         hasInteracted = true;
@@ -1039,8 +1174,7 @@
         }
       }
 
-      document.addEventListener("click", startAudioOnUserInteraction, { once: true });
-      document.addEventListener("touchstart", startAudioOnUserInteraction, { once: true });
+      document.addEventListener("click", startAudioOnUserInteraction);
 
       /* ================= CANVAS PARTICLES ================= */
       const canvas = document.getElementById('particles-canvas');
@@ -1099,58 +1233,294 @@
       /* ================= STUDENTS DATA ================= */
       const students = [
         {
-          nama: "Aditya Pratama",
-          panggilan: "Adit",
-          kesan: "Thank you Ardian sensei udah sabar ngajarin subnetting sampai kabel UTP kami berkali-kali gagal crimping!",
-          pesan: "Semoga Ardian sensei selalu sehat dan bandwidth rezekinya tidak pernah mengalami packet loss!",
+          nama: "Aisyah Nur Athaillah",
+          panggilan: "Aisyah",
+          kesan: "Thank you Ardian sensei sudah membimbing kami memahami logika jaringan & troubleshooting server.",
+          pesan: "Semoga Ardian sensei selalu berkarya dan sukses mencetak teknisi IT hebat berikutnya!",
           foto: "",
           video: "",
         },
         {
-          nama: "Bagas Sahputra",
+          nama: "Alvian Iqbal Pratama",
+          panggilan: "Iqbal",
+          kesan: "Belajar IT sama Ardian sensei itu seru banget, materi rumit jadi gampang dipahami.",
+          pesan: "Semoga IP keberkahan Ardian sensei selalu Static dan terhindar dari error!",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Ardhito Pandu Adisaputra",
+          panggilan: "Pandu",
+          kesan: "Sabar banget ngajarin kami dari nol sampai paham konsep routing & konfigurasi Linux.",
+          pesan: "Sukses terus Ardian sensei, thank you atas dedikasi tanpa batas untuk 11 TKJ!",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Aris Rintoko Ragil Saputro",
+          panggilan: "Aris",
+          kesan: "Praktikum lab komputer nggak bakal se-seru ini tanpa kebaikan dan bimbingan Ardian sensei.",
+          pesan: "Koneksi ilmu dari Ardian sensei akan terus kami bawa sampai jenjang karir nanti.",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Ashfiya Tara Maulida",
+          panggilan: "Raya",
+          kesan: "Thank you Ardian sensei sudah membimbing kami memahami logika jaringan & troubleshooting server.",
+          pesan: "Semoga Ardian sensei selalu berkarya dan sukses mencetak teknisi IT hebat berikutnya!",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Atifah Salsabila Julia Fezky",
+          panggilan: "Bella",
+          kesan: "Belajar IT sama Ardian sensei itu seru banget, materi rumit jadi gampang dipahami.",
+          pesan: "Semoga IP keberkahan Ardian sensei selalu Static dan terhindar dari error!",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Azriel Wijaya Sopian",
+          panggilan: "Ziel",
+          kesan: "Sabar banget ngajarin kami dari nol sampai paham konsep routing & konfigurasi Linux.",
+          pesan: "Sukses terus Ardian sensei, thank you atas dedikasi tanpa batas untuk 11 TKJ!",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Bagas Aly Imam Kuncoro",
           panggilan: "Bagas",
-          kesan: "Banyak hal seputar MikroTik dan Server yang dulu bikin pusing, jadi gampang paham berkat bimbingan Ardian sensei.",
-          pesan: "Jangan pernah lupakan kami kelas 11 TKJ ya Sensei, jalinan koneksi kita selamanya terhubung!",
+          kesan: "Praktikum lab komputer nggak bakal se-seru ini tanpa kebaikan dan bimbingan Ardian sensei.",
+          pesan: "Koneksi ilmu dari Ardian sensei akan terus kami bawa sampai jenjang karir nanti.",
           foto: "",
           video: "",
         },
         {
-          nama: "Citra Dewi",
-          panggilan: "Citra",
-          kesan: "Paling berkesan pas praktikum di lab jaringan. Ardian sensei selalu tenang pas server lab tiba-tiba trouble.",
-          pesan: "Thank you sudah jadi Default Gateway jalan masa depan kami, Ardian sensei!",
+          nama: "Bagus Pasha Aryawan",
+          panggilan: "Arya",
+          kesan: "Thank you Ardian sensei sudah membimbing kami memahami logika jaringan & troubleshooting server.",
+          pesan: "Semoga Ardian sensei selalu berkarya dan sukses mencetak teknisi IT hebat berikutnya!",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Balqis Subekti",
+          panggilan: "Balqis",
+          kesan: "Belajar IT sama Ardian sensei itu seru banget, materi rumit jadi gampang dipahami.",
+          pesan: "Semoga IP keberkahan Ardian sensei selalu Static dan terhindar dari error!",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Bintang Rahadian Suryadilaga",
+          panggilan: "Bintang",
+          kesan: "Sabar banget ngajarin kami dari nol sampai paham konsep routing & konfigurasi Linux.",
+          pesan: "Sukses terus Ardian sensei, thank you atas dedikasi tanpa batas untuk 11 TKJ!",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Ega Alwiya Putra",
+          panggilan: "Ega",
+          kesan: "Praktikum lab komputer nggak bakal se-seru ini tanpa kebaikan dan bimbingan Ardian sensei.",
+          pesan: "Koneksi ilmu dari Ardian sensei akan terus kami bawa sampai jenjang karir nanti.",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Ervina Jannika Putri",
+          panggilan: "Ervina",
+          kesan: "Thank you Ardian sensei sudah membimbing kami memahami logika jaringan & troubleshooting server.",
+          pesan: "Semoga Ardian sensei selalu berkarya dan sukses mencetak teknisi IT hebat berikutnya!",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Jovita Egania Agselysia",
+          panggilan: "Jovita",
+          kesan: "Belajar IT sama Ardian sensei itu seru banget, materi rumit jadi gampang dipahami.",
+          pesan: "Semoga IP keberkahan Ardian sensei selalu Static dan terhindar dari error!",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Laurentius Ariesta Yodha Pratama",
+          panggilan: "Yodha",
+          kesan: "Sabar banget ngajarin kami dari nol sampai paham konsep routing & konfigurasi Linux.",
+          pesan: "Sukses terus Ardian sensei, thank you atas dedikasi tanpa batas untuk 11 TKJ!",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Mohammad Dzakwan Fathi",
+          panggilan: "Fathi",
+          kesan: "Praktikum lab komputer nggak bakal se-seru ini tanpa kebaikan dan bimbingan Ardian sensei.",
+          pesan: "Koneksi ilmu dari Ardian sensei akan terus kami bawa sampai jenjang karir nanti.",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Muhammad Atha Arrayyan",
+          panggilan: "Atha",
+          kesan: "Thank you Ardian sensei sudah membimbing kami memahami logika jaringan & troubleshooting server.",
+          pesan: "Semoga Ardian sensei selalu berkarya dan sukses mencetak teknisi IT hebat berikutnya!",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Muhammad Awjad Awthory",
+          panggilan: "Thory",
+          kesan: "Belajar IT sama Ardian sensei itu seru banget, materi rumit jadi gampang dipahami.",
+          pesan: "Semoga IP keberkahan Ardian sensei selalu Static dan terhindar dari error!",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Muhammad Fahry Firmansyah",
+          panggilan: "Fahry",
+          kesan: "Sabar banget ngajarin kami dari nol sampai paham konsep routing & konfigurasi Linux.",
+          pesan: "Sukses terus Ardian sensei, thank you atas dedikasi tanpa batas untuk 11 TKJ!",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Muhammad Khanif",
+          panggilan: "Khanif",
+          kesan: "Praktikum lab komputer nggak bakal se-seru ini tanpa kebaikan dan bimbingan Ardian sensei.",
+          pesan: "Koneksi ilmu dari Ardian sensei akan terus kami bawa sampai jenjang karir nanti.",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Muhammad Yahya Wijaya",
+          panggilan: "Yahya",
+          kesan: "Thank you Ardian sensei sudah membimbing kami memahami logika jaringan & troubleshooting server.",
+          pesan: "Semoga Ardian sensei selalu berkarya dan sukses mencetak teknisi IT hebat berikutnya!",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Muzhaffar Hafiz Falah Zakwan",
+          panggilan: "Hafiz",
+          kesan: "Belajar IT sama Ardian sensei itu seru banget, materi rumit jadi gampang dipahami.",
+          pesan: "Semoga IP keberkahan Ardian sensei selalu Static dan terhindar dari error!",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Nindira Aliyah Azizah",
+          panggilan: "Nindira",
+          kesan: "Sabar banget ngajarin kami dari nol sampai paham konsep routing & konfigurasi Linux.",
+          pesan: "Sukses terus Ardian sensei, thank you atas dedikasi tanpa batas untuk 11 TKJ!",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Nova Ardana Saputra",
+          panggilan: "Nova",
+          kesan: "Praktikum lab komputer nggak bakal se-seru ini tanpa kebaikan dan bimbingan Ardian sensei.",
+          pesan: "Koneksi ilmu dari Ardian sensei akan terus kami bawa sampai jenjang karir nanti.",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Pramudya Irvan Maulana",
+          panggilan: "Ipam",
+          kesan: "Thank you Ardian sensei sudah membimbing kami memahami logika jaringan & troubleshooting server.",
+          pesan: "Semoga Ardian sensei selalu berkarya dan sukses mencetak teknisi IT hebat berikutnya!",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Rafael Karunia Canda Putra Aji",
+          panggilan: "Karunia",
+          kesan: "Belajar IT sama Ardian sensei itu seru banget, materi rumit jadi gampang dipahami.",
+          pesan: "Semoga IP keberkahan Ardian sensei selalu Static dan terhindar dari error!",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Rajendra Rasendriya Widyatama",
+          panggilan: "Tama",
+          kesan: "Sabar banget ngajarin kami dari nol sampai paham konsep routing & konfigurasi Linux.",
+          pesan: "Sukses terus Ardian sensei, thank you atas dedikasi tanpa batas untuk 11 TKJ!",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Rakha Eartha Zufar",
+          panggilan: "Rakha",
+          kesan: "Praktikum lab komputer nggak bakal se-seru ini tanpa kebaikan dan bimbingan Ardian sensei.",
+          pesan: "Koneksi ilmu dari Ardian sensei akan terus kami bawa sampai jenjang karir nanti.",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Ricko Rasyid Faturochman",
+          panggilan: "Ricko",
+          kesan: "Thank you Ardian sensei sudah membimbing kami memahami logika jaringan & troubleshooting server.",
+          pesan: "Semoga Ardian sensei selalu berkarya dan sukses mencetak teknisi IT hebat berikutnya!",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Riza Nu'man Nashir",
+          panggilan: "Riza",
+          kesan: "Belajar IT sama Ardian sensei itu seru banget, materi rumit jadi gampang dipahami.",
+          pesan: "Semoga IP keberkahan Ardian sensei selalu Static dan terhindar dari error!",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Samuel Davin Susanto",
+          panggilan: "Davin",
+          kesan: "Sabar banget ngajarin kami dari nol sampai paham konsep routing & konfigurasi Linux.",
+          pesan: "Sukses terus Ardian sensei, thank you atas dedikasi tanpa batas untuk 11 TKJ!",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Satria Dzaki Risqulloh",
+          panggilan: "Satria",
+          kesan: "Praktikum lab komputer nggak bakal se-seru ini tanpa kebaikan dan bimbingan Ardian sensei.",
+          pesan: "Koneksi ilmu dari Ardian sensei akan terus kami bawa sampai jenjang karir nanti.",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Scania Dyaz Ayu Mulia Putri",
+          panggilan: "Scania",
+          kesan: "Thank you Ardian sensei sudah membimbing kami memahami logika jaringan & troubleshooting server.",
+          pesan: "Semoga Ardian sensei selalu berkarya dan sukses mencetak teknisi IT hebat berikutnya!",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Syifa Ayu Tiara",
+          panggilan: "Syiyu",
+          kesan: "Belajar IT sama Ardian sensei itu seru banget, materi rumit jadi gampang dipahami.",
+          pesan: "Semoga IP keberkahan Ardian sensei selalu Static dan terhindar dari error!",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Usamah Al Furqan",
+          panggilan: "Furqan",
+          kesan: "Sabar banget ngajarin kami dari nol sampai paham konsep routing & konfigurasi Linux.",
+          pesan: "Sukses terus Ardian sensei, thank you atas dedikasi tanpa batas untuk 11 TKJ!",
+          foto: "",
+          video: "",
+        },
+        {
+          nama: "Zaidan Abyansah",
+          panggilan: "Zaidan",
+          kesan: "Praktikum lab komputer nggak bakal se-seru ini tanpa kebaikan dan bimbingan Ardian sensei.",
+          pesan: "Koneksi ilmu dari Ardian sensei akan terus kami bawa sampai jenjang karir nanti.",
           foto: "",
           video: "",
         }
       ];
-
-      const tkjQuotesKesan = [
-        "Thank you Ardian sensei sudah membimbing kami memahami logika jaringan & troubleshooting server.",
-        "Belajar IT sama Ardian sensei itu seru banget, materi rumit jadi gampang dipahami.",
-        "Sabar banget ngajarin kami dari nol sampai paham konsep routing & konfigurasi Linux.",
-        "Praktikum lab komputer nggak bakal se-seru ini tanpa kebaikan dan bimbingan Ardian sensei."
-      ];
-      
-      const tkjQuotesPesan = [
-        "Semoga Ardian sensei selalu berkarya dan sukses mencetak teknisi IT hebat berikutnya!",
-        "Semoga IP keberkahan Ardian sensei selalu Static dan terhindar dari error!",
-        "Sukses terus Ardian sensei, thank you atas dedikasi tanpa batas untuk 11 TKJ!",
-        "Koneksi ilmu dari Ardian sensei akan terus kami bawa sampai jenjang karir nanti."
-      ];
-
-      while (students.length < 36) {
-        const n = students.length + 1;
-        const kIdx = (n - 1) % tkjQuotesKesan.length;
-        const pIdx = (n - 1) % tkjQuotesPesan.length;
-        students.push({
-          nama: `Siswa TKJ #${n}`,
-          panggilan: `Absen ${n}`,
-          kesan: tkjQuotesKesan[kIdx],
-          pesan: tkjQuotesPesan[pIdx],
-          foto: "",
-          video: "",
-        });
-      }
 
       const finaleVideo = "Tabidachi-No-Uta.mp4";
 
@@ -1178,11 +1548,11 @@
 <section class="slide active" data-i="0">
   <div class="hero-inner">
     <div class="hero-tag">Dari kami, anak-anak 11 TKJ</div>
-    <h1>Makasih, Ardian Sensei</h1>
+    <h1>Thank You, Ardian Sensei</h1>
     <p class="hero-sub">
       Makasih udah sabar ngajarin kami dari yang <highlight>nggak ngerti apa-apa soal jaringan</highlight>, sampai akhirnya paham — walau kadang harus dijelasin berkali-kali. Makasih juga udah lebih dari sekadar guru buat kami selama ini.
     </p>
-    <button class="hero-cta" id="startBtn">Baca Ucapan Kita Semua</button>
+    <button class="hero-cta" id="startBtn">Kesan Pesan dari Kami</button>
   </div>
 </section>`;
 
@@ -1196,7 +1566,7 @@
     <div>
       <span class="absen-badge">ABSEN #${absen} // 11 TKJ</span>
       <div class="student-name">${s.nama}</div>
-      <div class="student-nick">@${s.panggilan.toLowerCase().replace(/\s+/g, '_')}</div>
+      <div class="student-nick">${s.panggilan}</div>
       <div class="kp-label">// KESAN KHUSUS</div>
       <div class="kp-text">${s.kesan}</div>
       <div class="kp-label">// PESAN UNTUK ARDIAN SENSEI</div>
@@ -1210,8 +1580,8 @@
       html += `
 <section class="slide next" data-i="37">
   <div class="finale-inner">
-    <h2>Sampai jumpa, Ardian sensei</h2>
-    <p>Ini video dari kita semua, kumpulan kenangan belajar bareng sensei selama di 11 TKJ.</p>
+    <h2>Sayonara, Ardian sensei</h2>
+    <p>Pesan ini kami persembahkan atas nama seluruh siswa kelas 11 TKJ untuk Ardian Sensei.</p>
     
     <div class="video-shell" id="videoContainer">
       <button id="cinema-close" title="Tutup">✕</button>
@@ -1242,10 +1612,6 @@
     <div class="thanks">
       Disusun penuh rasa hormat oleh Keluarga Besar 11 TKJ untuk Ardian sensei.
     </div>
-    <div class="kb-hint">
-      <span>Tekan <kbd>Space</kbd> Play/Pause</span>
-      <span>Tekan <kbd>F</kbd> Fullscreen</span>
-    </div>
   </div>
 </section>`;
 
@@ -1256,7 +1622,6 @@
       const total = slides.length;
       let current = 0;
       const progressFill = document.getElementById("progress-fill");
-      const counter = document.getElementById("counter");
       const prevBtn = document.getElementById("prevBtn");
       const nextBtn = document.getElementById("nextBtn");
       const moonContainer = document.getElementById("moonContainer");
@@ -1291,7 +1656,6 @@
         });
         
         progressFill.style.width = (current / (total - 1)) * 100 + "%";
-        counter.textContent = (current + 1) + " / " + total;
         prevBtn.disabled = current === 0;
         nextBtn.disabled = current === total - 1;
 
@@ -1307,6 +1671,20 @@
         }
 
         updateMoonPosition(current);
+
+        // Tombol BGM baru nongol pas pertama kali masuk slide ke-2 (index 1),
+        // dengan animasi pop-in. Sesudahnya, tetap keliatan permanen walau
+        // balik lagi ke slide 1 atau pindah ke slide mana pun.
+        if (!bgmBtnRevealed && current >= 1) {
+          bgmBtnRevealed = true;
+          bgmBtn.classList.remove("bgm-pending");
+          bgmBtn.classList.add("bgm-pop");
+          bgmBtn.addEventListener(
+            "animationend",
+            () => bgmBtn.classList.remove("bgm-pop"),
+            { once: true }
+          );
+        }
 
         // Auto fadeout BGM saat memasuki halaman terakhir (bukan mati total,
         // cuma di-pause). Kalau balik lagi ke slide sebelumnya, musiknya
@@ -1429,7 +1807,16 @@
       }
 
       function toggleFullscreen() {
-        if (!document.fullscreenElement) {
+        // Cek spesifik elemen videoContainer-nya, bukan cuma "ada fullscreen
+        // apa nggak" — soalnya halaman ini sendiri bisa udah fullscreen
+        // duluan (dari gerbang wajib-fullscreen). Kalau cuma cek truthy,
+        // klik video malah nge-exit fullscreen halaman alih-alih masuk
+        // fullscreen video, terus mental balik ke gerbang wajib-fullscreen.
+        const isVideoFullscreen =
+          document.fullscreenElement === videoContainer ||
+          document.webkitFullscreenElement === videoContainer;
+
+        if (!isVideoFullscreen) {
           if (videoContainer.requestFullscreen) {
             videoContainer.requestFullscreen();
           } else if (videoContainer.webkitRequestFullscreen) {
@@ -1438,6 +1825,8 @@
         } else {
           if (document.exitFullscreen) {
             document.exitFullscreen();
+          } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
           }
         }
       }
@@ -1537,7 +1926,7 @@
         } else if (e.key === "ArrowLeft") {
           goTo(current - 1);
         } 
-        else if (current === total - 1 || document.fullscreenElement) {
+        else if (current === total - 1) {
           if (e.code === "Space") {
             e.preventDefault();
             togglePlay();
