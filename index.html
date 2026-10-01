@@ -1464,9 +1464,9 @@
         opacity: 0; visibility: hidden; transition: opacity .35s ease, visibility 0s linear .35s;
       }
       #lb.open { opacity: 1; visibility: visible; transition: opacity .35s ease; }
-      #lb .lb-stage { position: relative; width: 100%; flex: 1; min-height: 0; display: grid; place-items: center; }
+      #lb .lb-stage { position: relative; width: 100%; flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
       #lb .lb-img {
-        max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 10px;
+        max-width: 100%; max-height: 100%; width: auto; height: auto; min-width: 0; min-height: 0; object-fit: contain; border-radius: 10px;
         box-shadow: 0 30px 90px rgba(0,0,0,.7); border: 1px solid rgba(245,197,24,.25);
         transition: opacity .3s ease, transform .5s var(--ease-out);
       }
@@ -1821,15 +1821,15 @@
       }
 
       function toggleBGM() {
-        if (typeof isFinaleNow === "function" && isFinaleNow()) {
-          return;
-        }
         bgmAutoPausedByFinale = false;
         isBgmOn = !isBgmOn;
         updateBgmUI();
 
+        const vid = document.getElementById("mainVideo");
+        const videoPlaying = vid && !vid.paused && !vid.ended;
+
         if (isBgmOn) {
-          fadeInBGM(bgmVolume);
+          if (!videoPlaying) fadeInBGM(bgmVolume);
         } else {
           fadeOutBGM();
         }
@@ -2173,9 +2173,9 @@
 
     <div class="docs-card">
       <div class="d-eyebrow">Bonus</div>
-      <h3>Doksli-nya ada di sini</h3>
-      <p>Tulisan asli sama gambaran dari anak-anak semua ada di sini. Boleh dibuka, boleh disimpan juga.</p>
-      <a class="docs-btn" href="https://drive.google.com/drive/folders/18F9M3CH7rPkl5VVd21rzVzFZr7dHC2ps?usp=drive_link" target="_blank" rel="noopener noreferrer">Lihat di Google Drive ↗</a>
+      <h3>Doksli-nya ada di sini, Sensei</h3>
+      <p>Tulisan asli sama gambaran dari anak-anak semua ada di sini. Boleh dibuka, boleh disimpan juga, Sensei.</p>
+      <a class="docs-btn" href="https://drive.google.com/drive/folders/18F9M3CH7rPkl5VVd21rzVzFZr7dHC2ps?usp=drive_link" target="_blank" rel="noopener noreferrer">Intip di Google Drive ↗</a>
     </div>
 
     <div class="thanks">
@@ -2251,23 +2251,8 @@
           );
         }
 
-        if (isFinaleNow()) {
-          if (isBgmOn) {
-            isBgmOn = false;
-            updateBgmUI();
-            fadeOutBGM();
-            bgmAutoPausedByFinale = true;
-          }
-          bgmBtn.disabled = true;
-        } else {
-          bgmBtn.disabled = false;
-          if (bgmAutoPausedByFinale) {
-            bgmAutoPausedByFinale = false;
-            isBgmOn = true;
-            updateBgmUI();
-            fadeInBGM(bgmVolume);
-          }
-        }
+        // BGM tetap jalan di slide finale; baru berhenti (fade) saat video diputar
+        bgmBtn.disabled = false;
       }
 
       function goTo(i) {
@@ -2459,6 +2444,16 @@
       });
 
       playPauseBtn.addEventListener("click", togglePlay);
+      // Lagu latar: fade out saat video diputar, fade in lagi saat video dijeda / selesai
+      mainVideo.addEventListener("play", () => {
+        if (isBgmOn) fadeOutBGM();
+      });
+      const resumeBgmAfterVideo = () => {
+        if (isBgmOn) fadeInBGM(bgmVolume);
+      };
+      mainVideo.addEventListener("pause", resumeBgmAfterVideo);
+      mainVideo.addEventListener("ended", resumeBgmAfterVideo);
+
       mainVideo.addEventListener("click", togglePlay);
 
       muteBtn.addEventListener("click", () => {
